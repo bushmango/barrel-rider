@@ -11,6 +11,8 @@ import { glob } from 'glob'
 
 console.log('The Barrel-Rider -- Create Typescript Index Files')
 
+const cwd = process.cwd()
+
 import * as commandLineArgs from 'command-line-args'
 import * as commandLineUsage from 'command-line-usage'
 
@@ -39,6 +41,16 @@ const sections = [
         description: 'Port to use for the watch server.',
       },
       {
+        name: 'extension',
+        typeLabel: '{underline String}',
+        description: 'Index file extension (ts or tsx)',
+      },
+      {
+        name: 'verbose',
+        typeLabel: '{underline Boolean}',
+        description: 'Show extra debug info.',
+      },
+      {
         name: 'help',
         description: 'Print this usage guide.',
       },
@@ -63,6 +75,7 @@ function run() {
     },
     { name: 'watch', alias: 'w', type: Boolean },
     { name: 'port', alias: 'p', type: Number },
+    { name: 'extension', alias: 'e', type: String },
   ]
   const options = commandLineArgs(optionDefinitions)
 
@@ -79,9 +92,20 @@ function run() {
     return
   }
 
+  _.defaults(options, { extension: 'ts' })
+
+  if (options.verbose) {
+    console.log('verbose mode')
+    console.log('cwd:', cwd)
+    console.log('options:', JSON.stringify(options, null, 2))
+  }
+
   const indexesToRebuild: string[] = []
 
   function rebuildIndex(_path: string) {
+    if (options.verbose) {
+      console.log('trying path', _path)
+    }
     if (
       _path.endsWith('index.ts') ||
       _path.endsWith('index.tsx') ||
@@ -89,6 +113,7 @@ function run() {
     ) {
       return // This shouldn't trigger rebuilding of indexes
     }
+
     let folder = path.dirname(_path)
     if (!_.includes(indexesToRebuild, folder)) {
       indexesToRebuild.push(folder)
@@ -143,7 +168,10 @@ function run() {
           lines.push('export const noop = () => {}')
         }
         // Write the file
-        fs.writeFileSync(path.join(_path, 'index.tsx'), lines.join('\n'))
+        fs.writeFileSync(
+          path.join(_path, 'index.' + options.extension),
+          lines.join('\n'),
+        )
         // Delete existing index.ts files
         // if (fs.existsSync(path.join(_path, 'index.ts'))) {
         //   fs.unlinkSync(path.join(_path, 'index.ts'))
@@ -163,25 +191,36 @@ function run() {
     return regex.test(f) || regex2.test(f)
   }
 
+  const watchDirecories = []
   _.forEach(options.src, (c) => {
     if (options.watch) {
-      const watchDirectory = path.join(__dirname, c)
-      rebuildIndex(watchDirectory)
-      let watcher = watch([watchDirectory + '**/*.(ts|tsx)'], {
-        ignoreInitial: false,
-      })
-      watcher.on('add', (_path: string, stat) => {
-        rebuildIndex(_path)
-      })
-      watcher.on('change', (_path, stat) => {
-        rebuildIndex(_path)
-      })
-      watcher.on('delete', (_path, stat) => {})
+      const watchDirectory = path.join(cwd, c)
+      //const watchDirectoryGlob = watchDirectory + '/**/*(.ts|.tsx)'
+      const watchDirectoryGlob = watchDirectory + '/**/*.(ts|tsx)'
+      watchDirecories.push(watchDirectoryGlob)
+      // rebuildIndex(watchDirectory)
+      if (options.verbose) {
+        console.log('watching: ', watchDirectoryGlob)
+      }
     } else {
       // TODO work without watch mode
       // glob(c + '/*.@(ts|tsx)')
     }
   })
+  if (options.watch) {
+    let watcher = watch(watchDirecories, {
+      ignoreInitial: false,
+    })
+    watcher.on('add', (_path: string, stat) => {
+      rebuildIndex(_path)
+    })
+    watcher.on('change', (_path, stat) => {
+      rebuildIndex(_path)
+    })
+    watcher.on('delete', (_path, stat) => {
+      rebuildIndex(_path)
+    })
+  }
 
   function _watch() {
     const app = express()
