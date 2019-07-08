@@ -8,6 +8,9 @@ import * as watch from 'glob-watcher'
 import * as _ from 'lodash'
 import * as path from 'path'
 import { glob } from 'glob'
+import { promisify } from 'util'
+const globAsync = promisify(glob)
+const unlinkAsync = promisify(fs.unlink)
 
 console.log('The Barrel-Rider -- Create Typescript Index Files')
 
@@ -62,7 +65,7 @@ const sections = [
 // const readFileAsync = promisify(fs.readFile)
 // const writeFileAsync = promisify(fs.writeFile)
 
-function run() {
+async function run() {
   const optionDefinitions = [
     { name: 'help', alias: 'h', type: Boolean },
     { name: 'verbose', alias: 'v', type: Boolean },
@@ -76,6 +79,7 @@ function run() {
     { name: 'watch', alias: 'w', type: Boolean },
     { name: 'port', alias: 'p', type: Number },
     { name: 'extension', alias: 'e', type: String },
+    { name: 'remove', alias: 'r', type: String },
   ]
   const options = commandLineArgs(optionDefinitions)
 
@@ -98,6 +102,20 @@ function run() {
     console.log('verbose mode')
     console.log('cwd:', cwd)
     console.log('options:', JSON.stringify(options, null, 2))
+  }
+
+  if (options.remove) {
+    // Delete existing index.ts files
+
+    let files = await globAsync(options.src + '/index.ts')
+    for (let f in files) {
+      await unlinkAsync(f)
+    }
+
+    files = await globAsync(options.src + '/index.tsx')
+    for (let f in files) {
+      await unlinkAsync(f)
+    }
   }
 
   const indexesToRebuild: string[] = []
@@ -173,16 +191,16 @@ function run() {
           path.join(_path, 'index.' + options.extension),
           lines.join('\n'),
         )
-        // Delete existing index.ts files
-        // if (fs.existsSync(path.join(_path, 'index.ts'))) {
-        //   fs.unlinkSync(path.join(_path, 'index.ts'))
-        // }
       })
     })
   }
   const rebuildIndexesThrottled = _.debounce(rebuildIndexes, 250)
 
-  function doesFileHaveNamedExport(_path, filename) {
+  function doesFileHaveNamedExport(_path, filename: string) {
+    if (filename.indexOf('delay') !== -1) {
+      console.log('delay!')
+    }
+
     let regex = new RegExp(
       `\\s*export\\s+(async\\s+)?(const|function|interface)\\s+(${filename})`,
     )
