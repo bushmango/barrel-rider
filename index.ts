@@ -12,7 +12,7 @@ import { promisify } from 'util'
 const globAsync = promisify(glob)
 const unlinkAsync = promisify(fs.unlink)
 
-console.log('The Barrel-Rider -- Create Typescript Index Files')
+console.log('The Barrel-Rider -- Create Typescript Index Files -- v1.0.4')
 
 const cwd = process.cwd()
 
