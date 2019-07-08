@@ -184,7 +184,7 @@ function run() {
 
   function doesFileHaveNamedExport(_path, filename) {
     let regex = new RegExp(
-      `\\s*export\\s+(async\s+)?(const|function|interface)\\s+(${filename})`,
+      `\\s*export\\s+(async\\s+)?(const|function|interface)\\s+(${filename})`,
     )
     let regex2 = new RegExp(`\\s*export\\s+{\\s+(${filename})\\s+.*}`)
 
