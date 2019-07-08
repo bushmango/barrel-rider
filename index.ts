@@ -109,7 +109,8 @@ function run() {
     if (
       _path.endsWith('index.ts') ||
       _path.endsWith('index.tsx') ||
-      _path.includes('node_modules')
+      _path.includes('node_modules') ||
+      _path.includes('pages')
     ) {
       return // This shouldn't trigger rebuilding of indexes
     }
