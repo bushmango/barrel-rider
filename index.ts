@@ -65,6 +65,20 @@ const sections = [
 // const readFileAsync = promisify(fs.readFile)
 // const writeFileAsync = promisify(fs.writeFile)
 
+async function removeIndexFile(_path) {
+  let skip = false
+  if (fs.existsSync(_path)) {
+    let cur = fs.readFileSync(_path, 'utf8')
+    if (cur.startsWith('// barrel-rider:ignore')) {
+      skip = true
+    }
+  }
+  if (!skip) {
+    console.log('removing', _path)
+    await unlinkAsync(_path)
+  }
+}
+
 async function run() {
   const optionDefinitions = [
     { name: 'help', alias: 'h', type: Boolean },
@@ -79,7 +93,7 @@ async function run() {
     { name: 'watch', alias: 'w', type: Boolean },
     { name: 'port', alias: 'p', type: Number },
     { name: 'extension', alias: 'e', type: String },
-    { name: 'remove', alias: 'r', type: String },
+    { name: 'remove', alias: 'r', type: Boolean },
   ]
   const options = commandLineArgs(optionDefinitions)
 
@@ -106,15 +120,15 @@ async function run() {
 
   if (options.remove) {
     // Delete existing index.ts files
-
-    let files = await globAsync(options.src + '/index.ts')
-    for (let f in files) {
-      await unlinkAsync(f)
+    console.log('deleting existing index files')
+    let files = await globAsync(options.src + '/**/index.ts')
+    for (let f of files) {
+      await removeIndexFile(f)
     }
 
-    files = await globAsync(options.src + '/index.tsx')
-    for (let f in files) {
-      await unlinkAsync(f)
+    files = await globAsync(options.src + '/**/index.tsx')
+    for (let f of files) {
+      await removeIndexFile(f)
     }
   }
 
@@ -127,8 +141,7 @@ async function run() {
     if (
       _path.endsWith('index.ts') ||
       _path.endsWith('index.tsx') ||
-      _path.includes('node_modules') ||
-      _path.includes('pages')
+      _path.includes('node_modules')
     ) {
       return // This shouldn't trigger rebuilding of indexes
     }
@@ -186,19 +199,26 @@ async function run() {
           // This is needed for CRA to compile (or we have to delete the index file)
           lines.push('export const noop = () => {}')
         }
+        let indexFilename = path.join(_path, 'index.' + options.extension)
         // Write the file
-        fs.writeFileSync(
-          path.join(_path, 'index.' + options.extension),
-          lines.join('\n'),
-        )
+        let skip = false
+        if (fs.existsSync(indexFilename)) {
+          let cur = fs.readFileSync(indexFilename, 'utf8')
+          if (cur.startsWith('// barrel-rider:ignore')) {
+            skip = true
+          }
+        }
+        if (!skip) {
+          fs.writeFileSync(indexFilename, lines.join('\n'))
+        }
       })
     })
   }
   const rebuildIndexesThrottled = _.debounce(rebuildIndexes, 250)
 
   function doesFileHaveNamedExport(_path, filename: string) {
-    if (filename.indexOf('delay') !== -1) {
-      console.log('delay!')
+    if (filename.indexOf('index') !== -1) {
+      return false
     }
 
     let regex = new RegExp(
@@ -207,6 +227,17 @@ async function run() {
     let regex2 = new RegExp(`\\s*export\\s+{\\s+(${filename})\\s+.*}`)
 
     let f = fs.readFileSync(_path, { encoding: 'utf8' })
+
+    if (filename.indexOf('delay') !== -1) {
+      console.log('delay!')
+      console.log(_path, filename)
+      console.log(regex)
+      console.log(regex2)
+      console.log(f)
+      console.log(regex.test(f))
+      console.log(regex2.test(f))
+    }
+
     return regex.test(f) || regex2.test(f)
   }
 
