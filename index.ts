@@ -9,6 +9,8 @@ import * as _ from 'lodash'
 import * as path from 'path'
 import { glob } from 'glob'
 import { promisify } from 'util'
+import * as normalize from 'normalize-path'
+
 const globAsync = promisify(glob)
 const unlinkAsync = promisify(fs.unlink)
 
@@ -228,15 +230,15 @@ async function run() {
 
     let f = fs.readFileSync(_path, { encoding: 'utf8' })
 
-    if (filename.indexOf('delay') !== -1) {
-      console.log('delay!')
-      console.log(_path, filename)
-      console.log(regex)
-      console.log(regex2)
-      console.log(f)
-      console.log(regex.test(f))
-      console.log(regex2.test(f))
-    }
+    // if (filename.indexOf('delay') !== -1) {
+    //   console.log('delay!')
+    //   console.log(_path, filename)
+    //   console.log(regex)
+    //   console.log(regex2)
+    //   console.log(f)
+    //   console.log(regex.test(f))
+    //   console.log(regex2.test(f))
+    // }
 
     return regex.test(f) || regex2.test(f)
   }
@@ -246,8 +248,8 @@ async function run() {
     if (options.watch) {
       const watchDirectory = path.join(cwd, c)
       //const watchDirectoryGlob = watchDirectory + '/**/*(.ts|.tsx)'
-      const watchDirectoryGlob = watchDirectory + '/**/*.(ts|tsx)'
-      watchDirecories.push(watchDirectoryGlob)
+      const watchDirectoryGlob = path.join(watchDirectory, '/**/*.(ts|tsx)')
+      watchDirecories.push(normalize(watchDirectoryGlob))
       // rebuildIndex(watchDirectory)
       if (options.verbose) {
         console.log('watching: ', watchDirectoryGlob)

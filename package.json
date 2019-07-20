@@ -19,6 +19,7 @@
     "glob": "^7.1.4",
     "glob-watcher": "^5.0.3",
     "lodash": "^4.17.11",
+    "normalize-path": "^3.0.0",
     "sorted-json": "^0.2.5",
     "ts-node": "8.2.0",
     "ts-node-dev": "^1.0.0-pre.32",
