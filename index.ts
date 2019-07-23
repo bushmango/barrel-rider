@@ -228,15 +228,15 @@ async function run() {
 
     let f = fs.readFileSync(_path, { encoding: 'utf8' })
 
-    if (filename.indexOf('delay') !== -1) {
-      console.log('delay!')
-      console.log(_path, filename)
-      console.log(regex)
-      console.log(regex2)
-      console.log(f)
-      console.log(regex.test(f))
-      console.log(regex2.test(f))
-    }
+    // if (filename.indexOf('delay') !== -1) {
+    //   console.log('delay!')
+    //   console.log(_path, filename)
+    //   console.log(regex)
+    //   console.log(regex2)
+    //   console.log(f)
+    //   console.log(regex.test(f))
+    //   console.log(regex2.test(f))
+    // }
 
     return regex.test(f) || regex2.test(f)
   }
