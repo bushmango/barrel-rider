@@ -248,8 +248,13 @@ async function run() {
     if (options.watch) {
       const watchDirectory = path.join(cwd, c)
       //const watchDirectoryGlob = watchDirectory + '/**/*(.ts|.tsx)'
-      const watchDirectoryGlob = path.join(watchDirectory, '/**/*.(ts|tsx)')
-      watchDirecories.push(normalize(watchDirectoryGlob))
+      let watchDirectoryGlob = path.join(watchDirectory, '/**/*.(ts|tsx)')
+
+      if (/^win/.test(process.platform)) {
+        watchDirectoryGlob = watchDirectoryGlob.replace(/\//g, '\\')
+      }
+
+      watchDirecories.push(watchDirectoryGlob)
       // rebuildIndex(watchDirectory)
       if (options.verbose) {
         console.log('watching: ', watchDirectoryGlob)
