@@ -252,7 +252,7 @@ async function run() {
       let watchDirectoryGlob = path.join(watchDirectory, '/**/*.(ts|tsx)')
 
       if (/^win/.test(process.platform)) {
-        watchDirectoryGlob = watchDirectoryGlob.replace(/\//g, '\\')
+        watchDirectoryGlob = watchDirectoryGlob.replace(/\\/g, '/')
       }
 
       watchDirecories.push(watchDirectoryGlob)
