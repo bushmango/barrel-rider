@@ -14,9 +14,10 @@ import * as normalize from 'normalize-path'
 const globAsync = promisify(glob)
 const unlinkAsync = promisify(fs.unlink)
 
-console.log('The Barrel-Rider -- Create Typescript Index Files -- v1.0.4')
+console.log('The Barrel-Rider -- Create Typescript Index Files -- v1.0.8')
 
 const cwd = process.cwd()
+console.log('in ' + cwd)
 
 import * as commandLineArgs from 'command-line-args'
 import * as commandLineUsage from 'command-line-usage'
@@ -256,9 +257,10 @@ async function run() {
 
       watchDirecories.push(watchDirectoryGlob)
       // rebuildIndex(watchDirectory)
-      if (options.verbose) {
-        console.log('watching: ', watchDirectoryGlob)
-      }
+      console.log('watching: ', watchDirectoryGlob)
+      // if (options.verbose) {
+      //   console.log('watching: ', watchDirectoryGlob)
+      // }
     } else {
       // TODO work without watch mode
       // glob(c + '/*.@(ts|tsx)')
