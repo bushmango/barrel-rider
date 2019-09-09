@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-
 import * as bodyParser from 'body-parser'
+import * as commandLineArgs from 'command-line-args'
+import * as commandLineUsage from 'command-line-usage'
 import * as cors from 'cors'
 import * as express from 'express'
 import * as fs from 'fs'
+import { glob } from 'glob'
 import * as watch from 'glob-watcher'
 import * as _ from 'lodash'
 import * as path from 'path'
-import { glob } from 'glob'
 import { promisify } from 'util'
-import * as normalize from 'normalize-path'
 
 const globAsync = promisify(glob)
 const unlinkAsync = promisify(fs.unlink)
@@ -18,9 +18,6 @@ console.log('The Barrel-Rider -- Create Typescript Index Files -- v1.0.8')
 
 const cwd = process.cwd()
 console.log('in ' + cwd)
-
-import * as commandLineArgs from 'command-line-args'
-import * as commandLineUsage from 'command-line-usage'
 
 const sections = [
   {
@@ -177,7 +174,11 @@ async function run() {
             // Skip d.ts files
             return
           }
-          if (f.indexOf('.spec.') !== -1 || f.indexOf('.test.') !== -1) {
+          if (
+            f.indexOf('.spec.') !== -1 ||
+            f.indexOf('.test.') !== -1 ||
+            f.indexOf('.e2e.') !== -1
+          ) {
             // Test files
             return
           }
