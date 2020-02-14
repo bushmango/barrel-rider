@@ -257,7 +257,7 @@ async function run() {
     }
 
     let regex = new RegExp(
-      `\\s*export\\s+(async\\s+)?(const|function|interface)\\s+(${filename})`,
+      `\\s*export\\s+(async\\s+)?(const|function|interface)\\s+(${filename})(\\s|\())`,
     )
     let regex2 = new RegExp(`\\s*export\\s+{\\s+(${filename})\\s+.*}`)
 
