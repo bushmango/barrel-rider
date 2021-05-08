@@ -18,7 +18,7 @@
     "express": "4.17.1",
     "glob": "7.1.6",
     "glob-watcher": "^5.0.3",
-    "lodash": "4.17.15",
+    "lodash": "4.17.21",
     "normalize-path": "^3.0.0",
     "sorted-json": "0.2.6",
     "ts-node": "8.6.2",
